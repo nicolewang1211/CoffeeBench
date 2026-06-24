@@ -7,7 +7,7 @@
   &nbsp;|
   <a href="https://github.com/SakanaAI/CoffeeBench" target="_blank">🧑‍💻 Code</a>
   &nbsp;|
-    <a href="https://pub.sakana.ai/xxxx" target="_blank">🔍 Trajectories</a>
+    <a href="https://pub.sakana.ai/CoffeeBench/trajectories.html" target="_blank">🔍 Trajectories</a>
   &nbsp;|
 
   <br/>
