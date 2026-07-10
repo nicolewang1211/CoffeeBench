@@ -59,6 +59,20 @@ def get_model(model: str) -> Model:
             base = model[: -len("-thinking")]
             return GeminiModel(model=base, enable_thinking=True)
         return GeminiModel(model=model)
+    elif model.startswith("local:") or model.startswith("local-vllm:"):
+        # Local models: local:<model_name> or local-vllm:<model_name>
+        from coffeebench.models.local_model import LocalModel
+
+        backend = "vllm" if model.startswith("local-vllm:") else "auto"
+        model_name = model.split(":", 1)[1]
+        
+        if model_name.endswith("-no-thinking"):
+            base = model_name[: -len("-no-thinking")]
+            return LocalModel(model=base, backend=backend, enable_thinking=False)
+        if model_name.endswith("-thinking"):
+            base = model_name[: -len("-thinking")]
+            return LocalModel(model=base, backend=backend, enable_thinking=True)
+        return LocalModel(model=model_name, backend=backend)
     elif "/" in model:
         # OpenRouter slugs are <org>/<model>, e.g. moonshotai/kimi-k2.6.
         from coffeebench.models.openrouter_model import OpenRouterModel

@@ -1,0 +1,22 @@
+# Roaster-A focal-model swap using smaller Qwen 3B model for faster testing.
+# CPU-only version to avoid MPS memory crashes on Mac.
+# 6-agent supply chain (2 farmers + 2 roasters + 2 retailers); 
+# score = true net income from the env's truth ledger over a 90-day 
+# horizon (or until roaster_A busts).
+
+[experiment]
+name = "roaster_focal_qwen_3b_cpu"
+description = "90-day NI baseline. roaster_A = local Qwen2.5-3B (CPU); everyone else = local Qwen2.5-3B (CPU). Score = true net income."
+
+[run]
+seeds = [0, 1, 2]
+max_days = 90
+main_agent = "roaster_A"
+
+[models]
+default = "local:Qwen/Qwen2.5-3B-Instruct"
+roaster_A = "local:Qwen/Qwen2.5-3B-Instruct"
+
+# Note: Set PYTORCH_ENABLE_MPS_FALLBACK=1 or disable MPS entirely with:
+# export PYTORCH_MPS_DISABLE=1
+# before running to force CPU mode and avoid MPS segfaults.

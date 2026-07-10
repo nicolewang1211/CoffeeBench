@@ -500,6 +500,7 @@ def parse_args():
     )
     p.add_argument(
         "--max_days",
+        "--max-days",
         type=int,
         default=None,
         help="Quarter = 90 days; full year = 365. Overrides config.run.max_days.",
@@ -512,6 +513,7 @@ def parse_args():
     )
     p.add_argument(
         "--main_agent",
+        "--main-agent",
         type=str,
         default=None,
         help="Designated focal agent (e.g. 'roaster_A'). When set, the run "
