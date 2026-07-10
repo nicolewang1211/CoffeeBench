@@ -1,0 +1,17 @@
+# Roaster-A focal-model swap using Llama-3.2-8B-Instruct.
+# 6-agent supply chain (2 farmers + 2 roasters + 2 retailers); 
+# score = true net income from the env's truth ledger over a 90-day 
+# horizon (or until roaster_A busts).
+
+[experiment]
+name = "roaster_focal_llama_8b"
+description = "90-day NI baseline. roaster_A = local Llama-3.2-8B; everyone else = local Llama-3.2-8B. Score = true net income."
+
+[run]
+seeds = [0, 1, 2]
+max_days = 90
+main_agent = "roaster_A"
+
+[models]
+default = "local:meta-llama/Llama-3.2-8B-Instruct"
+roaster_A = "local:meta-llama/Llama-3.2-8B-Instruct"

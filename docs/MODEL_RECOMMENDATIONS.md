@@ -45,17 +45,35 @@ python -m coffeebench.main --config experiments/roaster_focal_qwen_32b.toml
 
 ### Tier 2: Smaller Models (for baselines)
 
-#### 4. **Qwen2.5-14B-Instruct**
+#### 4. **Qwen2.5-3B-Instruct**
+- **Size**: 3B parameters (~2GB VRAM)
+- **Strengths**: Very fast, excellent for rapid prototyping and debugging
+- **Config**: `roaster_focal_qwen_3b.toml`
+- **Model ID**: `Qwen/Qwen2.5-3B-Instruct`
+
+#### 5. **Llama-3.2-3B-Instruct**
+- **Size**: 3B parameters (~2GB VRAM)
+- **Strengths**: Alternative small model for testing
+- **Config**: `roaster_focal_llama_3b.toml`
+- **Model ID**: `meta-llama/Llama-3.2-3B-Instruct`
+
+#### 6. **Qwen2.5-7B-Instruct**
+- **Size**: 7B parameters (~4GB VRAM)
+- **Strengths**: Fast, efficient, good for testing
+- **Config**: `roaster_focal_qwen_7b.toml`
+- **Model ID**: `Qwen/Qwen2.5-7B-Instruct`
+
+#### 7. **Llama-3.2-8B-Instruct**
+- **Size**: 8B parameters (~5GB VRAM)
+- **Strengths**: Very fast, good for rapid testing
+- **Config**: `roaster_focal_llama_8b.toml`
+- **Model ID**: `meta-llama/Llama-3.2-8B-Instruct`
+
+#### 8. **Qwen2.5-14B-Instruct**
 - **Size**: 14B parameters (~8GB VRAM)
 - **Strengths**: Fast, efficient, good baseline
 - **Config**: `roaster_focal_qwen_14b.toml`
 - **Model ID**: `Qwen/Qwen2.5-14B-Instruct`
-
-#### 5. **Llama-3.2-8B-Instruct**
-- **Size**: 8B parameters (~5GB VRAM)
-- **Strengths**: Very fast, good for rapid testing
-- **Existing Config**: `roaster_focal_llama_3b.toml` (update to 8B)
-- **Model ID**: `meta-llama/Llama-3.2-8B-Instruct`
 
 ---
 

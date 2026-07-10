@@ -49,9 +49,23 @@ cd /path/to/CoffeeBench
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source $HOME/.cargo/env
 
-# Install with vLLM for optimized multi-GPU inference
-# Use python3.11 if your default python3 is too old
-uv sync --group vllm --python python3.11
+# IMPORTANT: Install PyTorch with matching CUDA version first
+# Check your CUDA version: nvidia-smi (look for "CUDA Version: X.Y")
+# Create venv first
+uv venv --python 3.11
+source .venv/bin/activate
+
+# Install PyTorch with correct CUDA version:
+# For CUDA 12.4: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+# For CUDA 12.1: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# For CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# Verify CUDA is available
+python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, GPUs: {torch.cuda.device_count()}')"
+
+# Then install CoffeeBench with vLLM
+uv sync --group vllm
 ```
 
 ### 4. Set Environment Variables
