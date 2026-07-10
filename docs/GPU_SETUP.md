@@ -8,27 +8,53 @@ This guide covers setting up CoffeeBench to run local models on GPU servers.
 - **2x NVIDIA RTX 3090** (24GB VRAM each, 48GB total)
 - CUDA 11.8+ or 12.x
 - Ubuntu 20.04+ or similar Linux distribution
+- **Python 3.10, 3.11, 3.12, or 3.13** (Python 3.8/3.9 are too old, 3.14+ not yet supported by vLLM)
 
 ## Installation
 
-### 1. Install CUDA and cuDNN
+### 1. Install Python 3.10+ (if needed)
+
+Check your Python version:
+```bash
+python3 --version
+```
+
+If you have Python 3.8 or 3.9, install Python 3.11:
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.11 python3.11-venv python3.11-dev
+
+# Verify
+python3.11 --version
+```
+
+### 2. Install CUDA and cuDNN
 ```bash
 # Verify CUDA installation
 nvidia-smi
 nvcc --version
 ```
 
-### 2. Install CoffeeBench with vLLM
+### 3. Install CoffeeBench with vLLM
 
 ```bash
 # Clone the repository
 cd /path/to/CoffeeBench
 
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.cargo/env
+
 # Install with vLLM for optimized multi-GPU inference
-uv sync --group vllm
+# Use python3.11 if your default python3 is too old
+uv sync --group vllm --python python3.11
 ```
 
-### 3. Set Environment Variables
+### 4. Set Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -106,7 +132,7 @@ These larger models need optimization:
 export USE_VLLM=true
 
 # Run experiment
-python -m coffeebench.main --experiment experiments/roaster_focal_qwen_32b.toml
+python -m coffeebench.main --config experiments/roaster_focal_qwen_32b.toml
 ```
 
 ## Performance Optimization
@@ -190,5 +216,5 @@ export USE_VLLM=true
 export HF_TOKEN=your_token
 
 # Run experiment
-python -m coffeebench.main --experiment experiments/roaster_focal_qwen_32b.toml
+python -m coffeebench.main --config experiments/roaster_focal_qwen_32b.toml
 ```

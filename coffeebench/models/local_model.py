@@ -33,7 +33,7 @@ class LocalModel:
     usage counters for cost/stat tracking.
     """
 
-    DEFAULT_MAX_INPUT_TOKENS = 200_000
+    DEFAULT_MAX_INPUT_TOKENS = 32_768
 
     # Shared cache keyed by (model_name, backend, device) to avoid loading the
     # same weights multiple times when several agents use the same model.
@@ -265,11 +265,17 @@ class LocalModel:
 
         print(f"[local:{self.backend}] Loading model with vLLM: {self.model_name}")
 
+        # Let vLLM auto-detect max_model_len from model config unless overridden
         vllm_kwargs = {
             "model": self.model_name,
             "trust_remote_code": True,
-            "max_model_len": self.max_input_tokens,
         }
+        
+        # Only set max_model_len if explicitly configured via env var
+        max_len_override = os.getenv("VLLM_MAX_MODEL_LEN")
+        if max_len_override:
+            vllm_kwargs["max_model_len"] = int(max_len_override)
+            print(f"[local:vllm] Using VLLM_MAX_MODEL_LEN={max_len_override}")
         hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
         if hf_token:
             vllm_kwargs["hf_token"] = hf_token

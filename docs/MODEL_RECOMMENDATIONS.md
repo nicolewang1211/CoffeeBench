@@ -12,7 +12,7 @@
 uv sync --group vllm
 export USE_VLLM=true
 export HF_TOKEN=your_hf_token
-python -m coffeebench.main --experiment experiments/roaster_focal_qwen_32b.toml
+python -m coffeebench.main --config experiments/roaster_focal_qwen_32b.toml
 ```
 
 ---
@@ -151,7 +151,7 @@ EOF
 huggingface-cli download Qwen/Qwen2.5-32B-Instruct
 
 # 4. Run experiment
-python -m coffeebench.main --experiment experiments/roaster_focal_qwen_32b.toml
+python -m coffeebench.main --config experiments/roaster_focal_qwen_32b.toml
 ```
 
 ---
