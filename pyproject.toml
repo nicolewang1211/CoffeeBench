@@ -11,7 +11,6 @@ dependencies = [
     "google-genai>=1.54.0",
     "hf-transfer>=0.1.9",
     "imageio>=2.37.3",
-    "llama-cpp-python>=0.3.33",
     "matplotlib>=3.10.8",
     "openai-agents>=0.4.2",
     "pandas>=2.3.3",

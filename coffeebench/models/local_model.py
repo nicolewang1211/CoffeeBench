@@ -271,6 +271,16 @@ class LocalModel:
             "trust_remote_code": True,
         }
         
+        # Enable tensor parallelism if multiple GPUs available
+        try:
+            import torch
+            gpu_count = torch.cuda.device_count()
+            if gpu_count > 1:
+                vllm_kwargs["tensor_parallel_size"] = gpu_count
+                print(f"[local:vllm] Using tensor parallelism across {gpu_count} GPUs")
+        except Exception:
+            pass
+        
         # Only set max_model_len if explicitly configured via env var
         max_len_override = os.getenv("VLLM_MAX_MODEL_LEN")
         if max_len_override:
