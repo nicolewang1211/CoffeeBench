@@ -63,7 +63,8 @@ class LocalModel:
         self.model_name = model
         self.model = f"local:{model}"  # String identifier for agent.py compatibility
         self.enable_thinking = enable_thinking
-        self.max_tokens = 1024  # Reduced from 4096 to prevent excessively long generations
+        # Allow max_tokens override via environment variable
+        self.max_tokens = int(os.getenv("LOCAL_MAX_TOKENS", "2048"))
         self.temperature = 0.0
 
         # Auto-detect backend if not specified
