@@ -27,7 +27,12 @@ class AnthropicModel:
         self.last_input_tokens = 0
         self.max_input_tokens = self.DEFAULT_MAX_INPUT_TOKENS
         self.model = model
-        self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"), timeout=300.0)
+        # Support custom base URL for Anthropic-compatible APIs (e.g., Intenext)
+        base_url = os.getenv("ANTHROPIC_BASE_URL")
+        if base_url:
+            self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"), base_url=base_url, timeout=300.0)
+        else:
+            self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"), timeout=300.0)
         # max_tokens reserves room for the visible output. With legacy
         # `thinking={enabled, budget}`, Anthropic requires
         # max_tokens > budget — we size accordingly in query().

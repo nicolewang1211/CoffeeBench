@@ -22,7 +22,12 @@ class OpenAIModel:
         self.last_input_tokens = 0
         self.max_input_tokens = self.DEFAULT_MAX_INPUT_TOKENS
         self.model = model
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=300.0)
+        # Support custom base URL for OpenAI-compatible APIs (e.g., Intenext)
+        base_url = os.getenv("OPENAI_BASE_URL")
+        if base_url:
+            self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=base_url, timeout=300.0)
+        else:
+            self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=300.0)
         self._skip_temperature = False
         self._skip_reasoning = False
         self.reasoning_effort = "high" if enable_thinking else "low"
