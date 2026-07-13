@@ -79,9 +79,9 @@ def _is_context_overflow(exc: BaseException) -> bool:
 def call_with_retry(
     fn: Callable[[], T],
     *,
-    max_attempts: int = 6,
+    max_attempts: int = 10,  # Increased from 6 for unstable APIs
     base_delay: float = 4.0,
-    max_delay: float = 60.0,
+    max_delay: float = 120.0,  # Increased from 60s for longer outages
     label: str = "api",
 ) -> T:
     """Run `fn()` and retry on transient API errors with backoff + jitter.
