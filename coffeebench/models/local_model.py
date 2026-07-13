@@ -277,7 +277,7 @@ class LocalModel:
         vllm_kwargs = {
             "model": self.model_name,
             "trust_remote_code": True,
-            "gpu_memory_utilization": 0.7,  # Use 70% for better KV cache allocation
+            "gpu_memory_utilization": 0.85,  # Use 85% for better performance
             "max_model_len": 8192,  # Reduce from 32k to save KV cache memory
         }
         
