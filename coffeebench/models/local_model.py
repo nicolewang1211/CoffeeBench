@@ -277,7 +277,8 @@ class LocalModel:
         vllm_kwargs = {
             "model": self.model_name,
             "trust_remote_code": True,
-            "gpu_memory_utilization": 0.5,  # Use 50% - vLLM is conservative with allocation
+            "gpu_memory_utilization": 0.7,  # Use 70% for better KV cache allocation
+            "max_model_len": 8192,  # Reduce from 32k to save KV cache memory
         }
         
         # Enable tensor parallelism only for large models that need it
