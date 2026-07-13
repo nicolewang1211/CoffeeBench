@@ -263,6 +263,14 @@ class LocalModel:
                 "Install with: pip install vllm"
             ) from e
 
+        # Check cache first - vLLM instances are expensive to create
+        cache_key = (self.model_name, self.backend, "cuda")  # vLLM always uses CUDA
+        if cache_key in LocalModel._shared_cache:
+            print(f"[local:{self.backend}] Reusing cached vLLM model: {self.model_name}")
+            self._model_obj, self.tokenizer = LocalModel._shared_cache[cache_key]
+            print(f"[local:{self.backend}] vLLM model loaded from cache")
+            return
+
         print(f"[local:{self.backend}] Loading model with vLLM: {self.model_name}")
 
         # Let vLLM auto-detect max_model_len from model config unless overridden
@@ -297,6 +305,9 @@ class LocalModel:
 
         self._model_obj = LLM(**vllm_kwargs)
         self.tokenizer = self._model_obj.get_tokenizer()
+        
+        # Cache the vLLM instance for reuse by other agents
+        LocalModel._shared_cache[cache_key] = (self._model_obj, self.tokenizer)
         print(f"[local:{self.backend}] vLLM model loaded")
 
     def _format_messages(self, messages: list[dict]) -> str:
