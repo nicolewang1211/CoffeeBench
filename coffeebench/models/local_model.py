@@ -269,6 +269,7 @@ class LocalModel:
         vllm_kwargs = {
             "model": self.model_name,
             "trust_remote_code": True,
+            "gpu_memory_utilization": 0.85,  # Use 85% to leave headroom
         }
         
         # Enable tensor parallelism only for large models that need it
@@ -277,6 +278,12 @@ class LocalModel:
         if tensor_parallel_size:
             vllm_kwargs["tensor_parallel_size"] = int(tensor_parallel_size)
             print(f"[local:vllm] Using tensor parallelism across {tensor_parallel_size} GPUs")
+        
+        # GPU memory utilization override
+        gpu_mem_util = os.getenv("VLLM_GPU_MEMORY_UTILIZATION")
+        if gpu_mem_util:
+            vllm_kwargs["gpu_memory_utilization"] = float(gpu_mem_util)
+            print(f"[local:vllm] Using GPU memory utilization: {gpu_mem_util}")
         
         # Only set max_model_len if explicitly configured via env var
         max_len_override = os.getenv("VLLM_MAX_MODEL_LEN")
