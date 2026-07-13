@@ -269,7 +269,7 @@ class LocalModel:
         vllm_kwargs = {
             "model": self.model_name,
             "trust_remote_code": True,
-            "gpu_memory_utilization": 0.85,  # Use 85% to leave headroom
+            "gpu_memory_utilization": 0.5,  # Use 50% - vLLM is conservative with allocation
         }
         
         # Enable tensor parallelism only for large models that need it
