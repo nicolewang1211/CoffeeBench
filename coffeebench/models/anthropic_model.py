@@ -88,8 +88,12 @@ class AnthropicModel:
         appends turns; this method is a pure shape translator and never
         re-orders.
         """
+        if os.getenv("DEBUG_API_CALLS"):
+            import json
+            print(f"\n[DEBUG] Converting {len(messages)} messages to Anthropic format")
+        
         out: list[dict] = []
-        for m in messages:
+        for idx, m in enumerate(messages):
             role = m.get("role")
             if role == "system":
                 # Anthropic carries the system prompt as a separate kwarg,
@@ -98,13 +102,16 @@ class AnthropicModel:
             if role == "tool":
                 # Tool results are sent back as a user-role message with a
                 # `tool_result` content block keyed by tool_use_id.
+                tool_call_id = m["tool_call_id"]
+                if os.getenv("DEBUG_API_CALLS"):
+                    print(f"  [{idx}] tool message: tool_call_id={tool_call_id}")
                 out.append(
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "tool_result",
-                                "tool_use_id": m["tool_call_id"],
+                                "tool_use_id": tool_call_id,
                                 "content": m.get("content", ""),
                             }
                         ],
@@ -117,6 +124,20 @@ class AnthropicModel:
                 # required for valid continuation when extended thinking
                 # was active. Fallback: rebuild from text + tool_calls.
                 raw = m.get("_raw")
+                tool_calls_list = m.get("tool_calls") or []
+                has_content = bool(m.get("content"))
+                
+                if os.getenv("DEBUG_API_CALLS"):
+                    num_tool_calls = len(tool_calls_list)
+                    print(f"  [{idx}] assistant: has_content={has_content}, num_tool_calls={num_tool_calls}")
+                    if num_tool_calls > 0:
+                        for tc in tool_calls_list:
+                            tc_id = tc.id if isinstance(tc, ToolCall) else tc["id"]
+                            tc_name = tc.name if isinstance(tc, ToolCall) else tc["name"]
+                            print(f"       tool_call: id={tc_id}, name={tc_name}")
+                    if not has_content and num_tool_calls == 0:
+                        print(f"       ⚠️  IDLE: assistant with no content and no tool_calls")
+                
                 if raw is not None:
                     out.append({"role": "assistant", "content": raw})
                 else:
@@ -124,7 +145,7 @@ class AnthropicModel:
                     text = m.get("content") or ""
                     if text:
                         blocks.append({"type": "text", "text": text})
-                    for tc in m.get("tool_calls") or []:
+                    for tc in tool_calls_list:
                         blocks.append(
                             {
                                 "type": "tool_use",
@@ -242,8 +263,46 @@ class AnthropicModel:
                 }
 
         def _do_call():
+            # Log raw request if DEBUG_API_CALLS is set
+            if os.getenv("DEBUG_API_CALLS"):
+                import json
+                debug_request = {
+                    "model": kwargs.get("model"),
+                    "messages": kwargs.get("messages"),
+                    "tools": kwargs.get("tools"),
+                    "tool_choice": kwargs.get("tool_choice"),
+                    "max_tokens": kwargs.get("max_tokens"),
+                }
+                print(f"\n[DEBUG] Anthropic API Request:\n{json.dumps(debug_request, indent=2)}\n")
+            
             try:
-                return self.client.messages.create(**kwargs)
+                response = self.client.messages.create(**kwargs)
+                
+                # Log raw response if DEBUG_API_CALLS is set
+                if os.getenv("DEBUG_API_CALLS"):
+                    import json
+                    debug_response = {
+                        "id": response.id,
+                        "role": response.role,
+                        "content": [
+                            {
+                                "type": block.type,
+                                "text": getattr(block, "text", None),
+                                "id": getattr(block, "id", None),
+                                "name": getattr(block, "name", None),
+                                "input": getattr(block, "input", None),
+                            }
+                            for block in response.content
+                        ],
+                        "stop_reason": response.stop_reason,
+                        "usage": {
+                            "input_tokens": response.usage.input_tokens,
+                            "output_tokens": response.usage.output_tokens,
+                        },
+                    }
+                    print(f"\n[DEBUG] Anthropic API Response:\n{json.dumps(debug_response, indent=2)}\n")
+                
+                return response
             except Exception as exc:
                 msg = str(exc).lower()
                 if (
@@ -343,7 +402,7 @@ class AnthropicModel:
                     }
                 )
 
-        return ModelResponse(
+        model_response = ModelResponse(
             content="".join(content_text_parts),
             thinking="".join(thinking_text_parts),
             tool_calls=tool_calls,
@@ -351,6 +410,29 @@ class AnthropicModel:
             cost=cost,
             raw=raw_blocks,
         )
+        
+        # Debug logging for idle drift detection
+        if os.getenv("DEBUG_API_CALLS"):
+            import json
+            has_content = bool(model_response.content)
+            has_tool_calls = bool(model_response.tool_calls)
+            num_tool_calls = len(model_response.tool_calls)
+            
+            print(f"\n[DEBUG] Parsed ModelResponse:")
+            print(f"  - has_content: {has_content}")
+            print(f"  - has_tool_calls: {has_tool_calls}")
+            print(f"  - num_tool_calls: {num_tool_calls}")
+            print(f"  - stop_reason: {model_response.stop_reason}")
+            
+            if not has_content and not has_tool_calls:
+                print(f"  ⚠️  IDLE DRIFT: No content and no tool_calls!")
+            if num_tool_calls > 1:
+                print(f"  ⚠️  PARALLEL CALLS: {num_tool_calls} tool calls in one response!")
+            
+            if has_tool_calls:
+                print(f"  - tool_calls: {json.dumps([{'id': tc.id, 'name': tc.name} for tc in model_response.tool_calls], indent=4)}")
+        
+        return model_response
 
     # ---------- usage / summarize ----------
 
